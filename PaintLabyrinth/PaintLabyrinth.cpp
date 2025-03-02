@@ -23,10 +23,11 @@ const int WALL_AREA = WALL_WIDTH * WALL_HEIGHT;
 
 struct Cell 
 {
+    int countPainted;
     bool isEmpty;
     bool isWatched;
     bool isWatching;
-    Cell(bool isEmpty = true, bool isWatched = false, bool isWatching = false) : isEmpty(isEmpty), isWatched(isWatched), isWatching(isWatching){};
+    Cell(bool isEmpty = true, bool isWatched = false, bool isWatching = false, int countPainted = 0) : isEmpty(isEmpty), isWatched(isWatched), isWatching(isWatching), countPainted(countPainted){};
 };
 int FirstLineToInt(std::ifstream &iFile)
 {
@@ -62,50 +63,67 @@ std::vector<std::vector<Cell>> processField(std::stack<std::pair<int, int>>&notW
 
             std::pair<int, int> tempCell = notWatchedEmptyCellsIndexes.top();
 
-            std::cout << tempCell.first + 1 << " " << tempCell.second + 1;
-            if ((tempCell.first != 0 || tempCell.second != 0) && !field[tempCell.first][tempCell.second].isWatching) {
+            if ((tempCell.first != 0 || tempCell.second != 0) && !field[tempCell.first][tempCell.second].isWatching) 
+            {
 
                 if (tempCell.first - 1 < 0 || (tempCell.first - 1 > 0 && !field[tempCell.first - 1][tempCell.second].isEmpty))
                 {
+                    field[tempCell.first][tempCell.second].countPainted += 1;
                     area += WALL_AREA;
                 }
                 if (tempCell.second - 1 < 0 || (tempCell.second - 1 > 0 && !field[tempCell.first][tempCell.second - 1].isEmpty))
                 {
+                    field[tempCell.first][tempCell.second].countPainted += 1;
                     area += WALL_AREA;
                 }
-                if (tempCell.first != sizeField - 1 || tempCell.second != sizeField - 1) {
-                    if (tempCell.first + 1 == sizeField || (tempCell.first + 1 < 5 && !field[tempCell.first + 1][tempCell.second].isEmpty))
+                if (tempCell.first != sizeField - 1 || tempCell.second != sizeField - 1) 
+                {
+                    if (tempCell.first + 1 == sizeField || (tempCell.first + 1 < sizeField && !field[tempCell.first + 1][tempCell.second].isEmpty))
                     {
+                        field[tempCell.first][tempCell.second].countPainted += 1;
                         area += WALL_AREA;
                     }
-                    if (tempCell.second + 1 == sizeField || (tempCell.second + 1 < 5 && !field[tempCell.first][tempCell.second + 1].isEmpty))
+                    if (tempCell.second + 1 == sizeField || (tempCell.second + 1 < sizeField && !field[tempCell.first][tempCell.second + 1].isEmpty))
                     {
+                        field[tempCell.first][tempCell.second].countPainted += 1;
                         area += WALL_AREA;
                     }
                 }
             }
-            std::cout << " --> " << area << "\n";
-            if (tempCell.first + 1 < sizeField && field[tempCell.first + 1][tempCell.second].isEmpty && !field[tempCell.first + 1][tempCell.second].isWatched && !field[tempCell.first + 1][tempCell.second].isWatching)
+            if (tempCell.first + 1 < sizeField && field[tempCell.first + 1][tempCell.second].isEmpty 
+                && !field[tempCell.first + 1][tempCell.second].isWatched 
+                && !field[tempCell.first + 1][tempCell.second].isWatching)
             {
                 field[tempCell.first][tempCell.second].isWatching = true;
                 notWatchedEmptyCellsIndexes.push({ tempCell.first + 1, tempCell.second });
-            } else if (tempCell.second + 1 < sizeField && field[tempCell.first][tempCell.second + 1].isEmpty && !field[tempCell.first][tempCell.second + 1].isWatched && !field[tempCell.first][tempCell.second + 1].isWatching)
+            } 
+            else if (tempCell.second + 1 < sizeField && field[tempCell.first][tempCell.second + 1].isEmpty
+                && !field[tempCell.first][tempCell.second + 1].isWatched 
+                && !field[tempCell.first][tempCell.second + 1].isWatching)
             {
                 field[tempCell.first][tempCell.second].isWatching = true;
                 notWatchedEmptyCellsIndexes.push({ tempCell.first, tempCell.second + 1 });
-            } else if (tempCell.second - 1 > 0 && field[tempCell.first][tempCell.second - 1].isEmpty && !field[tempCell.first][tempCell.second - 1].isWatched && !field[tempCell.first][tempCell.second - 1].isWatching) {
+            } 
+            else if (tempCell.second - 1 > 0 && field[tempCell.first][tempCell.second - 1].isEmpty 
+                && !field[tempCell.first][tempCell.second - 1].isWatched 
+                && !field[tempCell.first][tempCell.second - 1].isWatching) 
+            {
                 field[tempCell.first][tempCell.second].isWatching = true;
                 notWatchedEmptyCellsIndexes.push({ tempCell.first, tempCell.second - 1 });
-            } else if (tempCell.first - 1 > 0 && field[tempCell.first - 1][tempCell.second].isEmpty && !field[tempCell.first - 1][tempCell.second].isWatched && !field[tempCell.first - 1][tempCell.second].isWatching && (tempCell.first != sizeField - 1 || tempCell.second != sizeField - 1)) {
+            } 
+            else if (tempCell.first - 1 >= 0 && field[tempCell.first - 1][tempCell.second].isEmpty 
+                && !field[tempCell.first - 1][tempCell.second].isWatched 
+                && !field[tempCell.first - 1][tempCell.second].isWatching && (tempCell.first != sizeField - 1 || tempCell.second != sizeField - 1)) 
+            {
                 field[tempCell.first][tempCell.second].isWatching = true;
                 notWatchedEmptyCellsIndexes.push({ tempCell.first - 1, tempCell.second });
-            } else {
+            }
+            else 
+            {
                 field[tempCell.first][tempCell.second].isWatched = true;
                 field[tempCell.first][tempCell.second].isWatching = false;
                 notWatchedEmptyCellsIndexes.pop();
             }
-
-
         }
         return field;
 }
@@ -125,13 +143,28 @@ int main()
     int area = 0;
 
     field = processField(notWatchedEmptyCellsIndexes, area, sizeField, field);
-    if (!field[sizeField - 1][sizeField - 1].isWatched) {
+    if (!field[sizeField - 1][sizeField - 1].isWatched) 
+    {
         notWatchedEmptyCellsIndexes.push({ sizeField - 1, sizeField - 1 });
         field = processField(notWatchedEmptyCellsIndexes, area, sizeField, field);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
-
+    for (int i = 0; i != sizeField; ++i)
+    {
+        for (int j = 0; j != sizeField; ++j) 
+        {
+            if (field[i][j].isEmpty) 
+            {
+                std::cout << field[i][j].countPainted;
+            }
+            else 
+            {
+                std::cout << "#";
+            }
+        }
+        std::cout << "\n";
+    }
     std::cout << "\nResult: " << area << "\n";
     std::cout << "Execution time: " << elapsed.count() << " seconds\n";
 
